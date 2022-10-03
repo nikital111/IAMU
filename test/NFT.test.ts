@@ -84,7 +84,7 @@ describe("NFT", function () {
 
   it("transfer nft", async function () {
     const { nft, owner, otherAccount } = await loadFixture(deployNFTFixture);
-
+    const address0 = "0x0000000000000000000000000000000000000000";
     // await nft.approve(otherAccount.address, 1);
 
     const transferTx = await nft["safeTransferFrom(address,address,uint256)"](
@@ -116,10 +116,19 @@ describe("NFT", function () {
           1
         )
     ).to.be.revertedWith("ERC721: transfer from incorrect owner");
+
+    await expect(
+      nft["safeTransferFrom(address,address,uint256)"](
+        owner.address,
+        address0,
+        532
+      )
+    ).to.be.revertedWith("ERC721: transfer to the zero address");
   });
 
   it("transfer from nft", async function () {
     const { nft, owner, otherAccount } = await loadFixture(deployNFTFixture);
+    const address0 = "0x0000000000000000000000000000000000000000";
 
     // await nft.approve(otherAccount.address, 1);
     await nft.setApprovalForAll(otherAccount.address, true);
@@ -144,6 +153,17 @@ describe("NFT", function () {
     expect(balanceOwner).to.eq(9999);
     expect(balanceotherAccount).to.eq(1);
     expect(onerOfToken).to.eq(otherAccount.address);
+
+    //reverts
+    await expect(
+      nft
+        .connect(otherAccount)
+        ["safeTransferFrom(address,address,uint256)"](
+          owner.address,
+          address0,
+          789
+        )
+    ).to.be.revertedWith("ERC721: transfer to the zero address");
   });
 
   it("change URIs", async function () {
